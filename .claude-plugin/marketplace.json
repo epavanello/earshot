@@ -1,0 +1,16 @@
+{
+  "name": "earshot",
+  "owner": {
+    "name": "epavanello"
+  },
+  "plugins": [
+    {
+      "name": "earshot",
+      "source": "./",
+      "description": "Spoken replies for Claude Code on macOS, plus an optional AirPods remote for Claude Desktop dictation."
+    }
+  ],
+  "metadata": {
+    "description": "Spoken replies for Claude Code on macOS, plus an AirPods remote for Claude Desktop dictation."
+  }
+}
