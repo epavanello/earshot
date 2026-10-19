@@ -23,7 +23,7 @@ Optional settings (env vars, e.g. in `settings.json` → `env`):
 | `EARSHOT_VOICE` | system voice | `Alice (Enhanced)` (list: `say -v '?'`) |
 | `EARSHOT_VOICE_RATE` | `185` | words per minute |
 
-Better voices: System Settings → Accessibility → Spoken Content → System voice → Manage Voices.
+Tip: leave `EARSHOT_VOICE` unset and pick a Siri voice in System Settings → Accessibility → Spoken Content → System voice. It sounds far more natural than the classic voices and `say` uses it by default.
 
 ## AirPods remote
 
