@@ -3,7 +3,7 @@
 Talk to Claude Code and hear the answer. macOS only.
 
 - **Spoken replies**: a `voice` skill makes Claude end each reply with a short spoken line, hidden behind an invisible marker and written in italics. A `Stop` hook reads it with the macOS `say` voice. With voice mode off, the hook stays silent.
-- **AirPods remote** (optional): click the stem to start Claude Desktop dictation, nod to send. Hands and keyboard free.
+- **AirPods remote** (optional): double-click the stem to start Claude Desktop dictation, nod to send. Hands and keyboard free.
 
 ## Install
 
@@ -37,10 +37,11 @@ Requires Claude Desktop, AirPods with head tracking (Pro, Max, 3rd gen+), Xcode 
 
 | Gesture | Action |
 | --- | --- |
-| Stem click, with Claude Desktop in front | Stops any speech, starts dictation (holds Cmd+D) |
+| Stem double click, with Claude Desktop in front | Stops any speech, starts dictation (holds Cmd+D) |
 | Chin down ~15° and back | Releases dictation and sends |
+| Any click while Claude is speaking, from any app | Stops the speech |
 
-With another app in front, clicks go back to play/pause. While you dictate, the speak hook skips the stale reply.
+Single clicks are left alone: taking an AirPod out sends the same command as a click. With another app in front, double click goes back to next track. While you dictate, the speak hook skips the stale reply.
 
 Uninstall: `airpods/uninstall.sh`. Log: `/tmp/earshot-remote.log`.
 

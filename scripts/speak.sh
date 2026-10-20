@@ -18,5 +18,6 @@ pkill -x say 2>/dev/null
 ARGS=(-r "${EARSHOT_VOICE_RATE:-185}")
 [ -n "$EARSHOT_VOICE" ] && ARGS+=(-v "$EARSHOT_VOICE")
 # New session: otherwise Claude Code kills the hook's process group and cuts the audio.
-perl -MPOSIX -e 'fork and exit; POSIX::setsid(); exec @ARGV' say "${ARGS[@]}" "$TEXT" </dev/null >/dev/null 2>&1
+# /tmp/earshot.speaking tells the AirPods remote to grab clicks so any click can stop the speech.
+perl -MPOSIX -e 'fork and exit; POSIX::setsid(); exec @ARGV' /bin/sh -c 'touch /tmp/earshot.speaking; say "$@"; rm -f /tmp/earshot.speaking' sh "${ARGS[@]}" "$TEXT" </dev/null >/dev/null 2>&1
 exit 0

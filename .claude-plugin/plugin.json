@@ -1,6 +1,6 @@
 {
   "name": "earshot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spoken replies for Claude Code on macOS, plus an optional AirPods remote for Claude Desktop dictation.",
   "author": { "name": "epavanello" },
   "repository": "https://github.com/epavanello/earshot",

@@ -1,6 +1,6 @@
 // AirPods remote for Claude Desktop dictation (macOS).
 // Claude Desktop dictation is push-to-talk on Cmd+D: held down it records, released it transcribes.
-// Stem click: holds Cmd+D. Chin down and back up: releases it and presses Return.
+// Stem double click (Claude Desktop in front): holds Cmd+D. Chin down and back up: releases it and presses Return.
 // While the mic is on, macOS keeps stem clicks for call mute; head motion still gets through.
 import AppKit
 import AVFoundation
@@ -17,6 +17,12 @@ let gestureGracePeriod = 1.0 // ignore head motion right after the click
 let restFollowRate = 0.02 // the rest pose slowly follows the real one (walking moves the head)
 // Semaphore for the speak hook: while it exists you are dictating, so replies are not read aloud.
 let recordingFlag = "/tmp/earshot.recording"
+// Written by the speak hook while `say` is talking: any click then stops the speech, whatever app is in front.
+let speakingFlag = "/tmp/earshot.speaking"
+
+func isSpeaking() -> Bool {
+    FileManager.default.fileExists(atPath: speakingFlag)
+}
 
 enum State { case idle, recording, sending }
 var state = State.idle
@@ -63,6 +69,7 @@ func activateClaude() -> Bool {
 }
 
 func stopSpeech() {
+    try? FileManager.default.removeItem(atPath: speakingFlag)
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
     process.arguments = ["-x", "say"]
@@ -138,7 +145,7 @@ func stopSilentPlayback() {
 // Own the clicks only while Claude is frontmost: with any other app in front they go back to music.
 func updateClickOwnership() {
     let isClaudeFrontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier == claudeBundleId
-    if isClaudeFrontmost || state != .idle {
+    if isClaudeFrontmost || state != .idle || isSpeaking() {
         if !engine.isRunning || !player.isPlaying { startSilentPlayback() }
         MPNowPlayingInfoCenter.default().playbackState = .playing
     } else if engine.isRunning {
@@ -156,16 +163,37 @@ NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChang
 }
 // Another app (e.g. Spotify) can take "now playing" even with Claude in front: take it back.
 Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in updateClickOwnership() }
+// Speech starts and ends outside this process: follow it closely so the first click can stop it.
+var wasSpeaking = false
+Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+    let speaking = isSpeaking()
+    if speaking != wasSpeaking {
+        wasSpeaking = speaking
+        updateClickOwnership()
+    }
+}
 
 let center = MPRemoteCommandCenter.shared()
-for command in [center.togglePlayPauseCommand, center.playCommand, center.pauseCommand] {
+// A double click (next track) starts dictation, only with Claude Desktop in front and nothing being
+// recorded. Single clicks are not used: taking an AirPod out sends the same "pause" as a click.
+// Anything arriving while you dictate is ignored too (sending is the nod's job).
+let namedCommands: [(String, MPRemoteCommand)] = [
+    ("togglePlayPause", center.togglePlayPauseCommand), ("play", center.playCommand), ("pause", center.pauseCommand),
+    ("nextTrack", center.nextTrackCommand),
+]
+for (name, command) in namedCommands {
     command.addTarget { _ in
         DispatchQueue.main.async {
-            switch state {
-            case .idle: startRecording()
-            case .recording: sendMessage()
-            case .sending: break
+            if isSpeaking() {
+                stopSpeech()
+                log("Speech stopped by \(name)")
             }
+            let isClaudeFrontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier == claudeBundleId
+            guard name == "nextTrack", state == .idle, isClaudeFrontmost else {
+                log("Ignored \(name) (state \(state), Claude in front: \(isClaudeFrontmost))")
+                return
+            }
+            startRecording()
         }
         return .success
     }
