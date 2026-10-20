@@ -41,7 +41,7 @@ Requires Claude Desktop, AirPods with head tracking (Pro, Max, 3rd gen+), Xcode 
 | Chin down ~15° and back | Releases dictation and sends |
 | Any click while Claude is speaking, from any app | Stops the speech |
 
-Single clicks are left alone: taking an AirPod out sends the same command as a click. With another app in front, double click goes back to next track. While you dictate, the speak hook skips the stale reply.
+Single clicks don't start dictation, because taking an AirPod out sends the same command as a click. When Claude isn't speaking and another app is in front, clicks go back to your music. While you dictate, the speak hook skips the stale reply.
 
 Uninstall: `airpods/uninstall.sh`. Log: `/tmp/earshot-remote.log`.
 
