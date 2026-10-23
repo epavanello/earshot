@@ -4,4 +4,5 @@
 <key>CFBundleIdentifier</key><string>com.github.epavanello.earshot-remote</string>
 <key>CFBundleName</key><string>earshot-remote</string>
 <key>NSMotionUsageDescription</key><string>Detects a nod to send the dictated message to Claude.</string>
+<key>NSMicrophoneUsageDescription</key><string>Detects when you stop talking to send the dictated message to Claude.</string>
 </dict></plist>
