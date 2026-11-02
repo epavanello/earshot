@@ -18,9 +18,20 @@ In Claude Code:
 
 Restart Claude Code, then say "voice mode" or run `/earshot:voice`. Say "normal mode" to turn it off.
 
-On a Claude Code build that runs plugin hooks modules, a **Voice** pane also opens with an On/Off switch (`/voice-panel` reopens it); the switch is remembered across sessions.
+On a Claude Code build that runs plugin hooks modules, a **Voice** pane opens at session start (`/voice-panel` reopens it). It picks the mode, shared by all your sessions:
 
-Replies from several sessions queue up and are read one after another; a click on the AirPods remote or Esc stops the current one and drops the queue.
+| Mode | A new reply |
+| --- | --- |
+| Off | no spoken line |
+| Now | chimes and is read at once |
+| On demand | chimes and waits in the queue |
+| Auto | Now when AirPods are the output, On demand otherwise |
+
+**Reply by voice** picks *when*: Always, or Only when dictated. Dictation (stem click, Cmd+D, the mic button) is told by the mic being in use with Claude in front during the 30 s before sending, which the AirPods remote watches, so that one needs the remote installed.
+
+The session you last talked to is read at once while Claude stays in front, whatever the mode; the others follow it.
+
+Replies from several sessions queue up and are read one after another, each introduced by its session's folder when it changes. Tap left Shift twice in any app (needs Hammerspoon) to play the next one; Esc or an AirPods click stops the speech and drops the queue.
 
 Optional settings (env vars, e.g. in `settings.json` → `env`):
 

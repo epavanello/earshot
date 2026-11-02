@@ -321,6 +321,13 @@ NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChang
 }
 // Another app (e.g. Spotify) can take "now playing" even with Claude in front: take it back.
 Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in updateClickOwnership() }
+// Dictation, however it starts (stem click, Cmd+D, Claude's mic button), shows as the mic in use with
+// Claude in front: the Voice pane's "Only when dictated" reads this file's age when a prompt is sent.
+let micUsedFlag = "/tmp/earshot.mic-used"
+Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+    guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier == claudeBundleId, isMicInUse() else { return }
+    FileManager.default.createFile(atPath: micUsedFlag, contents: nil)
+}
 // Speech starts and ends outside this process: follow it closely so the first click can stop it.
 var wasSpeaking = false
 Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
