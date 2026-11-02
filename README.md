@@ -18,6 +18,10 @@ In Claude Code:
 
 Restart Claude Code, then say "voice mode" or run `/earshot:voice`. Say "normal mode" to turn it off.
 
+On a Claude Code build that runs plugin hooks modules, a **Voice** pane also opens with an On/Off switch (`/voice-panel` reopens it); the switch is remembered across sessions.
+
+Replies from several sessions queue up and are read one after another; a click on the AirPods remote or Esc stops the current one and drops the queue.
+
 Optional settings (env vars, e.g. in `settings.json` → `env`):
 
 | Variable | Default | Example |

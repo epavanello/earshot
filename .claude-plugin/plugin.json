@@ -1,8 +1,11 @@
 {
   "name": "earshot",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Spoken replies for Claude Code on macOS, plus an optional AirPods remote for Claude Desktop dictation.",
-  "author": { "name": "epavanello" },
+  "author": {
+    "name": "epavanello"
+  },
   "repository": "https://github.com/epavanello/earshot",
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./types/index.d.ts"
 }

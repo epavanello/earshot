@@ -76,7 +76,7 @@ func installEscWatcher() {
     if not earshotEsc or not earshotEsc:isEnabled() then
       earshotEsc = hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(e)
         if e:getKeyCode() == 53 and hs.fs.attributes('\(speakingFlag)') then
-          os.execute('/usr/bin/pkill -x say; rm -f \(speakingFlag)')
+          os.execute('rm -rf /tmp/earshot.queue; /usr/bin/pkill -x say; rm -f \(speakingFlag)')
         end
         return false
       end):start()
@@ -119,6 +119,8 @@ func isMicInUse() -> Bool {
 }
 
 func stopSpeech() {
+    // Drop the lines still queued first, or the player would go on with the next one.
+    try? FileManager.default.removeItem(atPath: "/tmp/earshot.queue")
     try? FileManager.default.removeItem(atPath: speakingFlag)
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
