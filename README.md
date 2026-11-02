@@ -31,7 +31,7 @@ On a Claude Code build that runs plugin hooks modules, a **Voice** pane opens at
 
 The session you last talked to is read at once while Claude stays in front, whatever the mode; the others follow it.
 
-Replies from several sessions queue up and are read one after another, each introduced by its session's folder when it changes. Tap left Shift twice in any app (needs Hammerspoon) to play the next one; Esc or an AirPods click stops the speech and drops the queue.
+Replies from several sessions queue up and are read one after another, each introduced by its session's current title when it changes. Tap left Shift twice in any app (needs Hammerspoon) to play the next one; Esc or an AirPods click stops the speech and drops the queue.
 
 Optional settings (env vars, e.g. in `settings.json` → `env`):
 

@@ -172,7 +172,7 @@ export const register: Register = on => {
         <Text dimColor>· Every new reply chimes, then is read now or waits, by mode.</Text>
         <Text dimColor>· The session you last talked to, with Claude in front, is always read at once.</Text>
         <Text dimColor>· Replies from several sessions queue up, one after another.</Text>
-        <Text dimColor>· Before a reply from another session it says where it comes from.</Text>
+        <Text dimColor>· Before a reply from another session it says its title.</Text>
         <Text dimColor>· Dictation is told by the mic being in use with Claude in front, up to 30 s before sending.</Text>
         <Text dimColor>· The mode is shared by all your sessions. /voice-panel reopens this pane.</Text>
       </Box>

@@ -14,13 +14,32 @@ except Exception:
     print("")
 ')"
 [ -z "$TEXT" ] && exit 0
-# The session's folder names it when the player announces where a line comes from.
+# The session's current title names it when the player announces where a line comes from: the last
+# title the transcript holds (a rename, else the generated one), else the session's folder.
 LABEL="$(printf '%s' "$INPUT" | python3 -I -c '
 import sys, json, os
 try:
-    print(os.path.basename((json.load(sys.stdin).get("cwd") or "").rstrip("/")))
+    hook = json.load(sys.stdin)
 except Exception:
-    print("")
+    hook = {}
+title = ""
+try:
+    found = {}
+    with open(hook.get("transcript_path") or "", errors="ignore") as transcript:
+        for line in transcript:
+            if "-title\"" not in line:
+                continue
+            try:
+                entry = json.loads(line)
+            except ValueError:
+                continue
+            for key in ("customTitle", "aiTitle"):
+                if entry.get(key):
+                    found[key] = entry[key]
+    title = found.get("customTitle") or found.get("aiTitle") or ""
+except Exception:
+    pass
+print(title or os.path.basename((hook.get("cwd") or "").rstrip("/")))
 ')"
 
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
