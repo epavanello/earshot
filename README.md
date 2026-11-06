@@ -2,7 +2,7 @@
 
 Talk to Claude Code and hear the answer. macOS only.
 
-- **Spoken replies**: a `voice` skill makes Claude end each reply with a short spoken line, hidden behind an invisible marker and written in italics. A `Stop` hook reads it with the macOS `say` voice. With voice mode off, the hook stays silent.
+- **Spoken replies**: a `voice` skill makes Claude end each reply with a short spoken line, hidden behind an invisible marker and written in italics. A `Stop` hook reads it with the macOS `say` voice. When Claude asks with buttons (AskUserQuestion), a `PreToolUse` hook reads the question while they are on screen. With voice mode off, the hooks stay silent.
 - **AirPods remote** (optional): **double-click** the stem to start Claude Desktop dictation, **pause** or **nod** to send, **click** or **Esc** to stop Claude talking. Hands and keyboard free.
 
 > **Double click, not single.** A single click doesn't start dictation, because taking an AirPod out sends the same command as a single click.

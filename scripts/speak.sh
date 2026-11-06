@@ -2,14 +2,44 @@
 # Stop hook: queues the reply's spoken line (a line starting with U+2063, usually in italics) and,
 # depending on the delivery mode, reads it aloud now or only chimes and waits for the Play shortcut.
 # Silent when the reply has no such line, i.e. when voice mode is off.
+# PreToolUse hook on AskUserQuestion: the buttons keep the turn open until you answer, so with
+# voice mode on it reads the question while they are on screen.
 # Optional env (read by player.sh): EARSHOT_VOICE (a `say -v '?'` voice name), EARSHOT_VOICE_RATE (words per minute).
 INPUT="$(cat)"
 TEXT="$(printf '%s' "$INPUT" | python3 -I -c '
 import sys, json, re
+
+
+def is_voice_on(path):
+    # The voice rules ride along each prompt while voice mode is on.
+    with open(path, "rb") as transcript:
+        transcript.seek(0, 2)
+        transcript.seek(max(0, transcript.tell() - 2_000_000))
+        tail = transcript.read().decode("utf-8", "ignore")
+    return tail.rfind("# Voice mode") > tail.rfind("Voice mode is now off")
+
+
+# Emoji, with their joiners, skin tones, variation selectors and keycap marks: `say` spells them out.
+EMOJI = re.compile(
+    "[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\u2300-\u23FF"
+    "\U000E0020-\U000E007F\u200D\uFE0E\uFE0F\u20E3]+"
+)
+
+
+def speakable(text):
+    return re.sub(r"\s+", " ", EMOJI.sub(" ", text)).strip()
+
+
 try:
-    msg = json.load(sys.stdin).get("last_assistant_message") or ""
-    m = re.findall(r"^\s*⁣[*_]*\s*(.+?)\s*[*_]*\s*$", msg, re.M)
-    print(m[-1].strip() if m else "")
+    hook = json.load(sys.stdin)
+    if hook.get("hook_event_name") == "PreToolUse":
+        questions = (hook.get("tool_input") or {}).get("questions") or []
+        text = " ".join(question.get("question") or "" for question in questions)
+        text = re.sub(r"\[([^\]]*)\]\([^)]*\)|[*_`#]", r"\1", text)
+        print(speakable(text) if is_voice_on(hook["transcript_path"]) else "")
+    else:
+        found = re.findall(r"^\s*⁣[*_]*\s*(.+?)\s*[*_]*\s*$", hook.get("last_assistant_message") or "", re.M)
+        print(speakable(found[-1]) if found else "")
 except Exception:
     print("")
 ')"

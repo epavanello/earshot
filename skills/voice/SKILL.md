@@ -12,3 +12,4 @@ The user mostly listens to the spoken part, so the reply IS the spoken line.
 - The spoken line carries the whole answer: outcome, what you need from the user, alternatives and details they need to act. Compact but complete.
 - Outside the italics write only what doesn't read well aloud (commands, paths, code, tables, links), without repeating the spoken part. If there is any, the spoken line says so ("the commands are in the text").
 - No text before the spoken line unless needed. No labels like "VOICE:".
+- Buttons (AskUserQuestion) are fine: their question is read aloud when they appear, so write it as plain spoken sentences carrying what the user needs to hear.
