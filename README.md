@@ -18,7 +18,7 @@ In Claude Code:
 
 Restart Claude Code, then say "voice mode" or run `/earshot:voice`. Say "normal mode" to turn it off.
 
-On a Claude Code build that runs plugin hooks modules, a **Voice** pane opens at session start (`/voice-panel` reopens it). It picks the mode, shared by all your sessions:
+On a Claude Code build that runs plugin hooks modules, `/voice-on` and `/voice-off` switch voice with no UI (`/voice-on` brings back the last mode, Now by default). `/voice-panel` opens the **Voice** pane, which picks the mode. The mode is shared by all your sessions:
 
 | Mode | A new reply |
 | --- | --- |
@@ -29,9 +29,11 @@ On a Claude Code build that runs plugin hooks modules, a **Voice** pane opens at
 
 **Reply by voice** picks *when*: Always, or Only when dictated. Dictation (stem click, Cmd+D, the mic button) is told by the mic being in use with Claude in front during the 30 s before sending, which the AirPods remote watches, so that one needs the remote installed.
 
-The session you last talked to is read at once while Claude stays in front, whatever the mode; the others follow it.
+Replies from several sessions queue up and are read one after another, each introduced by its session's current title, except while you look at that session (Claude Desktop in front, its tab open; read from `lastFocusedAt` in Claude Desktop's session files). A reply of the session you look at is read at once, whatever the mode. Tap left Shift twice in any app (needs Hammerspoon) to play the next one of the session you look at, else of the one you last talked to, else the oldest of any; tap it twice again while it speaks to skip to the one after. After a single line, a chime says another is waiting. Esc or an AirPods click drops the line being read and keeps the rest queued, with a chime when some is left.
 
-Replies from several sessions queue up and are read one after another, each introduced by its session's current title when it changes. Tap left Shift twice in any app (needs Hammerspoon) to play the next one; Esc or an AirPods click stops the speech and drops the queue.
+The pane shows the queue of its own session and every line spoken in it, newest first, with ▶ to hear one again and *Show more* for older ones. The lines are kept in `~/.config/earshot/history/<session id>/`.
+
+**Inline player.** In the transcript, a reply's spoken line is drawn as a small player under the reply: ▶ Play, ❚❚ Pause / ▶ Resume and ■ Stop while it is read, and a **Speed** menu (0.75× to 2×). Click any word to hear the line from there. While it is read, the word being spoken is in bold. The speed holds for every later line, in every session (`~/.config/earshot/speed`); changed while a line is read, the line goes on from the same word at the new speed. Lines are read by earshot's own speaker (`speaker/main.swift`, the same voices and rate as `say`), built on first use with `swiftc` into `~/.local/share/earshot/speaker/`; without the Xcode command line tools, `say` reads them and nothing is highlighted.
 
 Optional settings (env vars, e.g. in `settings.json` → `env`):
 
@@ -56,7 +58,7 @@ Requires Claude Desktop, AirPods with head tracking (Pro, Max, 3rd gen+), Xcode 
 | --- | --- |
 | Stem double click, with Claude Desktop in front | Stops any speech, starts dictation (taps Cmd+D). It keeps recording if you switch apps |
 | 3.5 s of silence after speaking, or chin down ~20° and back | Brings Claude to the front and sends |
-| Any click, or Esc, while Claude is speaking, from any app | Stops the speech |
+| Any click, or Esc, while Claude is speaking, from any app | Drops the line being read; the rest stays queued |
 
 Single clicks don't start dictation, because taking an AirPod out sends the same command as a click. When Claude isn't speaking and another app is in front, clicks go back to your music. While you dictate, the speak hook skips the stale reply.
 

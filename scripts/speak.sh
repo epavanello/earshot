@@ -73,21 +73,31 @@ print(title or os.path.basename((hook.get("cwd") or "").rstrip("/")))
 ')"
 
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+SESSION="$(printf '%s' "$INPUT" | python3 -I -c 'import sys, json; print(json.load(sys.stdin).get("session_id") or "")' 2>/dev/null)"
 # Lines from several sessions queue up instead of cutting each other off: each one is a file,
-# named so they sort by arrival (first line the session, then the text), read by a single player.
+# named so they sort by arrival and end with the session id (first line the session's title, then
+# the text), read by a single player.
 QUEUE=/tmp/earshot.queue
 mkdir -p "$QUEUE"
-ENTRY="$(perl -MTime::HiRes=time -e 'printf "%.6f", time')-$$.txt"
+ENTRY="$(perl -MTime::HiRes=time -e 'printf "%.6f", time')-$$-${SESSION:-none}.txt"
 printf '%s\n%s' "$LABEL" "$TEXT" >"$QUEUE/$ENTRY"
+# Every line is also kept, per session, for the Voice pane's history (replay).
+HISTORY="$HOME/.config/earshot/history/${SESSION:-none}"
+mkdir -p "$HISTORY" && cp "$QUEUE/$ENTRY" "$HISTORY/$ENTRY"
 
 afplay /System/Library/Sounds/Glass.aiff >/dev/null 2>&1 &
-# The reply of the session you last talked to, with Claude still in front: you are there, read it now.
+# The reply of the session you are looking at: you are there, read it now.
 # Any other session follows the mode, which may only chime and wait for Play.
-SESSION="$(printf '%s' "$INPUT" | python3 -I -c 'import sys, json; print(json.load(sys.stdin).get("session_id") or "")' 2>/dev/null)"
+# You are there: Claude Desktop in front with this session's tab open, or (when that can't be told)
+# Claude in front and this the session you last wrote to.
 FRONT="$(lsappinfo info -only bundleid "$(lsappinfo front)" 2>/dev/null)"
 IS_HERE=no
-[ -n "$SESSION" ] && [ "$SESSION" = "$(cat /tmp/earshot.active-session 2>/dev/null)" ] &&
+HERE="$("$ROOT/scripts/here-session.sh")"
+if [ -n "$SESSION" ] && [ "$SESSION" = "$HERE" ]; then
+  IS_HERE=yes
+elif [ -z "$HERE" ] && [ -n "$SESSION" ] && [ "$SESSION" = "$(cat /tmp/earshot.active-session 2>/dev/null)" ]; then
   case "$FRONT" in *com.anthropic.claudefordesktop*) IS_HERE=yes ;; esac
+fi
 [ "$IS_HERE" = no ] && [ "$("$ROOT/scripts/mode.sh")" = "ask" ] && exit 0
 # Here and the mode would wait: read only this reply, ahead of what other sessions left queued.
 PLAY=()
