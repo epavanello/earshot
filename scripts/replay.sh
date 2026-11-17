@@ -14,6 +14,43 @@ QUEUE=/tmp/earshot.queue
 mkdir -p "$QUEUE"
 # Only the last Play counts: earlier replays still waiting are dropped.
 rm -f "$QUEUE"/0-replay-*
+# Playing a line also takes it, and every older line of its session, out of the queue: you have
+# caught up with that session, so the Play shortcut doesn't go back and read them (or it) again.
+# The line is found by its entry (history replay) or by its text among the session's queued lines.
+python3 -I - "$QUEUE" "$1" "$2" "$LINE" <<'PY'
+import os, sys
+queue, session, entry, line = sys.argv[1:5]
+suffix = f"-{session}.txt"
+
+
+def stamp(name):
+    try:
+        return float(name.split("-", 1)[0])
+    except ValueError:
+        return None
+
+
+mine = sorted(n for n in os.listdir(queue) if n.endswith(suffix) and not n.startswith("0-replay-"))
+cutoff = None
+if entry != "--text":
+    cutoff = stamp(entry)
+else:
+    for name in mine:
+        try:
+            with open(os.path.join(queue, name), errors="ignore") as f:
+                body = f.read().partition("\n")[2].strip()
+        except OSError:
+            continue
+        if body == line.strip():
+            cutoff = stamp(name)
+if cutoff is not None:
+    for name in mine:
+        if (stamp(name) or 0) <= cutoff:
+            try:
+                os.remove(os.path.join(queue, name))
+            except OSError:
+                pass
+PY
 # Sorts before every timestamped entry; a player still busy plays it next.
 AT=""
 [ "$2" = "--text" ] && [ -n "$4" ] && AT="-at$4"
