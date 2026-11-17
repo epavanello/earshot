@@ -116,7 +116,9 @@ while :; do
   TEXT="$(tail -n +2 "$FILE" 2>/dev/null)"
   rm -f "$FILE"
   [ -z "$TEXT" ] && continue
-  while is_dictating; do sleep 0.5; done
+  # A line you asked for (Play in the inline player or the pane) is read at once; one that just
+  # arrived waits until you stop dictating.
+  case "$NEXT" in 0-replay-*) ;; *) while is_dictating; do sleep 0.5; done ;; esac
   # Tells the AirPods remote to grab clicks so any click can stop the speech.
   touch "$SPEAKING"
   [ "$PLAYED" -ge 1 ] && sleep "$PAUSE"

@@ -12,12 +12,21 @@ fi
 [ -n "$LINE" ] || exit 0
 QUEUE=/tmp/earshot.queue
 mkdir -p "$QUEUE"
+# Only the last Play counts: earlier replays still waiting are dropped.
+rm -f "$QUEUE"/0-replay-*
 # Sorts before every timestamped entry; a player still busy plays it next.
 AT=""
 [ "$2" = "--text" ] && [ -n "$4" ] && AT="-at$4"
 ENTRY="0-replay-$$$AT-$1.txt"
 # No title announcement: you asked for this line.
 { echo; printf '%s' "$LINE"; } >"$QUEUE/$ENTRY"
+# A player holding the lock without speaking is waiting (dictation, the pause between lines): you
+# asked for this line, so it goes.
+PID="$(cat /tmp/earshot.player/pid 2>/dev/null)"
+if [ -n "$PID" ] && [ ! -e /tmp/earshot.speaking ] && kill -0 "$PID" 2>/dev/null; then
+  kill "$PID" 2>/dev/null
+  rm -rf /tmp/earshot.player
+fi
 # A player speaking now: cut it short and give it a moment to let go of the lock (a player reading
 # the whole queue takes this entry itself, being first).
 if [ -e /tmp/earshot.speaking ]; then
